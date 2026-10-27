@@ -121,7 +121,7 @@ uv run python ../evaluation/run_secretary.py
 
 资料库闭环通过真实主 API 验收：导入 `evidence/library-import-fixture.md`（arXiv:1706.03762 的公开摘要与原始链接），第一次返回 `imported=1, skipped=0`，重复导入返回 `imported=0, skipped=1`；`GET /api/sources` 保留 `2017-06-12`、`https://arxiv.org/abs/1706.03762` 和稳定 `source-…` ID。相关想法检索将论文排在首位；在 `2026-03-01` cutoff 的真实预检中，论文作为第 2 个比较出现并带回原始出处。
 
-档案馆首屏通过真实主 API 验收：输入 “Replace recurrence with self-attention to model long-range dependencies” 后，回执展示 Attention 与 BERT 两条真实召回及各自可定位出处，盖章「有出处」，考据币从 20 增至 35；点「继续正式考据」会把想法带入表单，机制字段留空等待补充。桌面 1440×900、1024×768 与手机 390×844 三档均完成“写纸条 → 回执”，390×844 另验证了继续预检与表单带入；控制台无错误，手机无横向溢出。静态构建同样可完成查档，但回执固定标注「演示回执」和固定样例说明。
+档案馆首屏通过真实主 API 验收：输入 “Replace recurrence with self-attention to model long-range dependencies” 后，回执展示 Attention 与 BERT 两条真实召回及各自可定位出处，盖章「有出处」，考据币从 20 增至 35；点「继续正式考据」会把想法带入表单，机制字段留空等待补充。桌面 1440×900、1024×768 与手机 390×844 三档均完成“写纸条 → 回执”，390×844 另验证了继续预检与表单带入；控制台无错误，手机无横向溢出。静态构建同样可完成查档，但回执固定标注「演示回执」和固定样例说明。公开站点已于 2026-10-27 更新为该静态版本，匿名桌面与手机端复查通过，线上入口引用与本地 `dist` 相同的资源文件。
 
 第二份验收材料 `evidence/library-import-fixture-bert.md`（arXiv:1810.04805 的公开摘要）同样首次导入 1 段、重复导入跳过 1 段；两篇论文共同进入秘书扫描。秘书闭环使用真实主 API 验收：2 个资料分段生成 1 条 `knowledge_line` 提案，人工接受后上下文 revision 为 5；随后的真实预检 `d7c41dfc-1a2c-4aae-b9f2-01634ed9bd40` 在 `context_refs` 中固定该 revision，并召回 Attention 论文。该预检中 BERT 未进入 top-6 融合比较，这是当前召回上限与 RRF 权重的已知边界，未为演示调高上限。回执见 `evidence/secretary-last-run.json`。
 
@@ -134,6 +134,7 @@ uv run python ../evaluation/run_secretary.py
 - `evidence/library-import-fixture.md`、`evidence/library-import-fixture-bert.md`：资料库与秘书验收使用的真实公开论文摘要，不是用户实验结果。
 - `evidence/secretary-last-run.json`：秘书夜间脚本的无摘录回执，包含扫描计数、提案 ID 与 PowerContext artifact 修订。
 - `evidence/hall-*.png`：档案馆首屏、真实检索回执、移动端回执、档案柜和静态演示回执的界面留档。
+- `evidence/published-hall-desktop.png`、`evidence/published-hall-mobile.png`：公开站点实际发布的桌面与手机端演示回执。
 - `evaluation/golden_cases.json`：预期裁决、必需证据和禁止的未来证据。
 - `evidence/`：实际运行结果、界面截图与 Qoder 开发记录。
 

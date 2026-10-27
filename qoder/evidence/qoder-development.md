@@ -78,6 +78,7 @@
 | 真实历史回放 | 七项断言全部通过，结果持久化并显示在报告页 |
 | 实验回流 | 实验与 `exp-…` 证据同时出现在 lineage，后续真实预检召回该证据 |
 | Qoder Sites 公开更新 | 2026-10-27 发布 action `ace3d78d-46d0-40b9-bcb2-d21c9fd094c4` 到 `https://nullpath-research-ci-5dqanvro27t.qoder.zone`；匿名首屏、资料库与秘书固定演示通过，控制台无错误 |
+| Qoder Sites 档案馆发布 | 2026-10-27 发布 action `3bfc2135-cbf4-4f30-91fc-1a7ec430d0b4` 到同一站点；线上入口引用与本地 `dist` 相同的 `index-DMegC5pi.js` / `index-k1bi_Idi.css`，匿名桌面 1440×727 与手机 390×844 均完成写纸条→回执，回执标注「演示回执」，考据币 20→35（同一浏览器移动端再查一次累加至 50），控制台 0 错误、无横向溢出 |
 
 详细机器结果见 `golden-results.json` 与 `ablation-results.json`。三路检索在这组小样本上都通过，不据此声称混合检索优于单路。
 
@@ -98,6 +99,8 @@
 - `hall-mobile.png`、`hall-mobile-receipt.png`：390×844 手机首屏与两结果回执。
 - `hall-drawer.png`：手机档案柜导航抽屉。
 - `hall-demo-receipt.png`：静态站固定演示回执，显式标注「演示回执」和固定样例说明。
+- `published-hall-desktop.png`：公开站点桌面端演示回执（1440×727），印章、证据与考据币均来自页面自身，不请求后端。
+- `published-hall-mobile.png`：公开站点 390×844 手机端回执，两条证据与底部操作完整可见。
 - `library-import.png`、`library-search.png`：真实导入资料及检索出处。
 - `library-two-papers.png`：资料库同时显示 Attention 与 BERT 两份真实导入摘要，以及「让秘书梳理」入口。
 - `secretary-review.png`：已接受的知识线、两份资料出处、workspace rev 9 与 accepted context rev 5。
@@ -131,7 +134,7 @@ uv run python ../evaluation/run_secretary.py
 - 时间隔离只保证输入证据的 cutoff，不声称模型训练知识具有时间边界。
 - Qoder Sites 仅发布明确标注的静态演示数据，资料库页面中的论文与研究秘书样例都是固定数据；首屏回执同样固定标注「演示回执 / 不随输入重新检索」。真实导入、秘书扫描与审阅、提交、终审、实验回流和回放需要本地 Compose 服务。
 - 档案馆的考据币只保存在浏览器 `localStorage`，不上传，也不影响研究记录或裁决；等级只反映查证次数，不代表研究质量或结论可信度。角色与场景采用组员手绘插画和本地 CSS/SVG，不加载远程素材。
-- 公开站点当前仍为包含研究资料库与研究秘书样例的上一版；档案馆首屏的静态构建已通过本地验收，尚未重新发布到 Qoder Sites。
+- 公开站点已于 2026-10-27 更新为档案馆大厅版本；匿名桌面与 390px 移动端验收通过，固定回执、印章与考据币可用。静态版仍不连接在线后端，真实验证需按本地 Compose 步骤运行。
 - 本地 PowerContext 配置关闭访问控制，仅绑定回环地址，不能直接暴露公网。
 - 代码推送与仓库公开由账号持有人执行；Qoder 仅完成本地提交与远端内容复核，未更改仓库可见性。
 
