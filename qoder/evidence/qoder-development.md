@@ -125,7 +125,8 @@ uv run python ../evaluation/run_secretary.py
 
 以下操作涉及账号、仓库可见性或公开站点，按当前约束未由 Qoder 自动执行：
 
-- 将 `qoder/`、`.gitignore` 等当前未跟踪文件提交到 `2026-competition-ecosystem` 并推送；当前远端分支只有 `.gitkeep`。
+- 本地提交 `512c4dad` 已创建（149 files changed, 20425 insertions）；`git push` 被 Qoder Auto 模式安全策略拦截，远端分支仍是 `.gitkeep`。需要账号持有人批准推送或手动执行：
+  `git push origin 2026-competition-ecosystem`
 - 确认仓库为公开，或向评审开放访问权限。
 - 在 Qoder 客户端补充 Qoder 账号 UID，以及关键开发环节的对话截图或录屏。
 - 切回原 Qoder Sites 发布账号后重新发布 `web/dist`；当前账号对原站点返回 `sites_request_failed`，公开站点仍是上一版。
