@@ -213,3 +213,5 @@ export interface AttemptInput {
   storage_gb: number;
   baseline_first: boolean;
 }
+
+export type Page = "hall" | "sources" | "secretary" | "report" | "new" | "evidence" | "regression" | "context" | "project";

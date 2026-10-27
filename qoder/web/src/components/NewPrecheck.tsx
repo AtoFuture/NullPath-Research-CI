@@ -52,9 +52,8 @@ export function NewPrecheck({ disabled, draft, onComplete }: { disabled: boolean
     if (!draft) return;
     setForm((current) => ({
       ...current,
-      title: current.title || draft.slice(0, 60),
+      title: current.title || draft.trim().split(/\s+/).slice(0, 6).join(" ").slice(0, 48),
       idea: draft,
-      mechanism: current.mechanism || draft,
       available_at: new Date().toISOString(),
     }));
   }, [draft]);

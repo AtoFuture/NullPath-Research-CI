@@ -116,7 +116,7 @@ export function SourcesView({ live, onSearch, onSecretary }: { live: boolean; on
 
       <section className="panel source-library">
         <div className="panel-heading"><div><span className="section-kicker">PERSISTENT LIBRARY</span><h2>已连接的研究资料</h2></div><span className="panel-count">{sources.length} 个可追溯资料分段</span></div>
-        {!sources.length && <div className="empty-state">还没有外部资料。导入第一份研究笔记后，就可以从「想法避坑」真实检索它。</div>}
+        {!sources.length && <div className="empty-state">还没有外部资料。导入第一份研究笔记后，就可以从「档案馆大厅」真实检索它。</div>}
         <div className="source-record-list">{sources.map((source) => <article className="source-record" key={source.attempt_id}>
           <FileText size={18} />
           <div><h3>{source.title}</h3>{/^https?:\/\//.test(source.locator) ? <a href={source.locator} target="_blank" rel="noreferrer">{source.locator}</a> : <code>{source.locator}</code>}</div>

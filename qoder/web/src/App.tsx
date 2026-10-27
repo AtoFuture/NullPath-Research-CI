@@ -20,21 +20,19 @@ import {
 } from "lucide-react";
 import { api, staticDemo } from "./api";
 import { sampleHealth, sampleReport } from "./sample";
-import type { Decision, Health, Report } from "./types";
+import type { Decision, Health, Page, Report } from "./types";
 import { ReportView } from "./components/ReportView";
 import { NewPrecheck } from "./components/NewPrecheck";
 import { EvidenceView } from "./components/EvidenceView";
 import { RegressionView } from "./components/RegressionView";
 import { ContextView } from "./components/ContextView";
 import { ProjectView } from "./components/ProjectView";
-import { QuickSearch } from "./components/QuickSearch";
+import { ArchiveHall } from "./components/ArchiveHall";
 import { SourcesView } from "./components/SourcesView";
 import { SecretaryView } from "./components/SecretaryView";
 
-type Page = "search" | "sources" | "secretary" | "report" | "new" | "evidence" | "regression" | "context" | "project";
-
 const navigation = [
-  { id: "search" as const, label: "想法避坑", icon: Search, group: "开始使用" },
+  { id: "hall" as const, label: "档案馆大厅", icon: Search, group: "开始使用" },
   { id: "sources" as const, label: "研究资料库", icon: LibraryBig, group: "开始使用" },
   { id: "new" as const, label: "完整预检", icon: Plus, group: "开始使用" },
   { id: "report" as const, label: "预检报告", icon: Activity, group: "开始使用" },
@@ -89,7 +87,7 @@ function DecisionDialog({ report, onClose, onSaved }: { report: Report; onClose:
 }
 
 export default function App() {
-  const [page, setPage] = useState<Page>("search");
+  const [page, setPage] = useState<Page>("hall");
   const [draft, setDraft] = useState("");
   const [report, setReport] = useState<Report>(sampleReport);
   const [sample, setSample] = useState(true);
@@ -127,12 +125,13 @@ export default function App() {
   }
 
   const isDemo = staticDemo || !live || sample;
+  const inHall = page === "hall";
   const groups = ["开始使用", "高级功能", "交付"];
 
   return (
-    <div className="app-shell">
+    <div className={`app-shell${inHall ? " hall-mode" : ""}`}>
       <aside className="sidebar">
-        <button className="brand" onClick={() => setPage("search")} aria-label="NullPath 首页"><BrandMark /><span><strong>NullPath</strong><small>RESEARCH CI</small></span></button>
+        <button className="brand" onClick={() => setPage("hall")} aria-label="NullPath 首页"><BrandMark /><span><strong>NullPath</strong><small>RESEARCH CI</small></span></button>
         <nav className="main-nav" aria-label="主导航">
           {groups.map((group) => <div className="nav-group" key={group}><span className="nav-group-label">{group}</span>{navigation.filter((item) => item.group === group).map((item) => <button key={item.id} className={page === item.id ? "nav-item active" : "nav-item"} onClick={() => setPage(item.id)}><item.icon size={17} strokeWidth={1.7} /><span>{item.label}</span>{page === item.id && <ChevronRight size={14} />}</button>)}</div>)}
         </nav>
@@ -148,7 +147,7 @@ export default function App() {
 
       <div className="workspace">
         <header className="topbar">
-          <div className="breadcrumb"><span>NullPath</span><ChevronRight size={13} /><strong>{navigation.find((item) => item.id === page)?.label}</strong></div>
+          <div className="breadcrumb"><button className="breadcrumb-home" onClick={() => setPage("hall")}>档案馆大厅</button><ChevronRight size={13} /><strong>{navigation.find((item) => item.id === page)?.label}</strong></div>
           <div className="topbar-actions">
             {(staticDemo || !live) && <span className="demo-notice"><FileClock size={14} />展示数据已标注</span>}
             {live && <span className="live-notice"><span className="pulse-dot online" />LIVE</span>}
@@ -156,8 +155,8 @@ export default function App() {
           </div>
         </header>
         <main>
-          {page === "search" && <QuickSearch disabled={!live} onContinue={(idea) => { setDraft(idea); setPage("new"); }} onSources={() => setPage("sources")} />}
-          {page === "sources" && <SourcesView live={live} onSearch={() => setPage("search")} onSecretary={() => setPage("secretary")} />}
+          {page === "hall" && <ArchiveHall live={live} onContinue={(idea) => { setDraft(idea); setPage("new"); }} onNavigate={setPage} />}
+          {page === "sources" && <SourcesView live={live} onSearch={() => setPage("hall")} onSecretary={() => setPage("secretary")} />}
           {page === "secretary" && <SecretaryView live={live} onSources={() => setPage("sources")} />}
           {page === "report" && <ReportView report={report} isDemo={isDemo} onEvidence={() => setPage("evidence")} onDecision={() => setDecisionOpen(true)} />}
           {page === "new" && <NewPrecheck disabled={!live} draft={draft} onComplete={showReport} />}
