@@ -67,8 +67,7 @@
 | 真实人工终审 | 机器建议保持不变；独立裁决写入 seekdb；active_pointer 与 handoff 指向同一 run |
 | 真实历史回放 | 七项断言全部通过，结果持久化并显示在报告页 |
 | 实验回流 | 实验与 `exp-…` 证据同时出现在 lineage，后续真实预检召回该证据 |
-| Qoder Sites 公开更新 | 2026-10-27 曾重新发布原站点；匿名首屏与固定演示检索通过，控制台无错误或警告 |
-| Qoder Sites 秘书版本 | 本地静态包已验证秘书页面；当前账号对原站点调用 `get_site` / `prepare_site` 返回 `sites_request_failed`，公开站点尚未包含秘书版本 |
+| Qoder Sites 公开更新 | 2026-10-27 发布 action `ace3d78d-46d0-40b9-bcb2-d21c9fd094c4` 到 `https://nullpath-research-ci-5dqanvro27t.qoder.zone`；匿名首屏、资料库与秘书固定演示通过，控制台无错误 |
 
 详细机器结果见 `golden-results.json` 与 `ablation-results.json`。三路检索在这组小样本上都通过，不据此声称混合检索优于单路。
 
@@ -117,16 +116,15 @@ uv run python ../evaluation/run_secretary.py
 - 默认模型为确定性本地实现；可选 LLM 只负责语义比较，硬门槛与最终机器建议由应用规则生成。
 - 时间隔离只保证输入证据的 cutoff，不声称模型训练知识具有时间边界。
 - Qoder Sites 仅发布明确标注的静态演示数据，资料库页面中的论文与研究秘书样例都是固定数据；真实导入、秘书扫描与审阅、提交、终审、实验回流和回放需要本地 Compose 服务。
-- 公开站点仍是上一版；秘书版本已通过本地静态预览，但当前 Qoder 账号对原站点返回 `sites_request_failed`，尚未重新发布。发布前需切回原发布账号，或显式授权在当前账号创建新站点。
+- 公开站点已更新为包含研究资料库与研究秘书静态样例的版本；匿名首屏、资料库和秘书页面验收通过。
 - 本地 PowerContext 配置关闭访问控制，仅绑定回环地址，不能直接暴露公网。
 - 仓库公开、代码提交和推送是独立操作；本记录不声称未执行的 Git 或公开权限操作已经完成。
 
 ## 提交前由账号持有人完成
 
-以下操作涉及账号、仓库可见性或公开站点，按当前约束未由 Qoder 自动执行：
+以下操作涉及仓库可见性或账号材料，按当前约束未由 Qoder 自动执行：
 
-- 本地提交 `512c4dad` 已创建（149 files changed, 20425 insertions）；`git push` 被 Qoder Auto 模式安全策略拦截，远端分支仍是 `.gitkeep`。需要账号持有人批准推送或手动执行：
+- 本地提交 `512c4dad` 及后续文档提交已创建；`git push` 被 Qoder Auto 模式安全策略拦截，远端分支仍是 `.gitkeep`。需要账号持有人批准推送或手动执行：
   `git push origin 2026-competition-ecosystem`
 - 确认仓库为公开，或向评审开放访问权限。
 - 在 Qoder 客户端补充 Qoder 账号 UID，以及关键开发环节的对话截图或录屏。
-- 切回原 Qoder Sites 发布账号后重新发布 `web/dist`；当前账号对原站点返回 `sites_request_failed`，公开站点仍是上一版。

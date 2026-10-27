@@ -133,6 +133,8 @@ uv run python ../evaluation/run_secretary.py
 
 Qoder Sites 发布的是 `web/dist` 静态版本。`web/.env.production` 启用明确标注的演示模式：可浏览报告、证据、黄金案例、研究资料库和研究秘书样例，但导入本地文件、秘书扫描与审阅、提交、终审、真实回放需要本地服务，不会伪造在线后端或在线摄取。
 
+公开站点：https://nullpath-research-ci-5dqanvro27t.qoder.zone
+
 Compose 的 Web 构建显式设置 `VITE_DEMO_MODE=false`，覆盖静态演示配置并连接真实 API。
 
 ```bash
