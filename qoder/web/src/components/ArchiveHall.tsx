@@ -205,8 +205,8 @@ export function ArchiveHall({ live, onContinue, onNavigate }: { live: boolean; o
   async function submit(event: FormEvent) {
     event.preventDefault();
     const text = (inputRef.current?.value ?? query).trim();
-    if (text.length < 10) {
-      setError("再写具体一点：至少 10 个字，馆员才翻得动旧档。");
+    if (!text) {
+      setError("先写一句想查的想法，老余才翻得动旧档。");
       inputRef.current?.focus();
       return;
     }
@@ -317,7 +317,7 @@ export function ArchiveHall({ live, onContinue, onNavigate }: { live: boolean; o
         <div className="hall-note-field">
           <div className="hall-note-meta">
             <label htmlFor="hall-query">写在纸条上，推给馆员</label>
-            <span className={`hall-note-count ${query.trim().length < 10 ? "is-short" : ""}`}>{query.trim().length < 10 ? `还差 ${10 - query.trim().length} 字` : "字数够了，可以递"}</span>
+            <span className="hall-note-count">{query.trim().length === 0 ? "写得越具体，越容易翻到旧档" : `${query.trim().length} 字`}</span>
           </div>
           <textarea ref={inputRef} id="hall-query" rows={2} value={query} aria-invalid={Boolean(error)} aria-describedby={error ? "hall-error" : undefined} onChange={(event) => { setQuery(event.target.value); if (error) setError(""); }} onKeyDown={onNoteKeyDown} placeholder="例如：我想用自注意力替代循环结构，验证长距离依赖是否真的更好……" />
         </div>

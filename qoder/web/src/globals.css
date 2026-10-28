@@ -683,7 +683,6 @@ label small { color: var(--muted); font-size: 9px; font-weight: 400; }
 .hall-note-meta { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
 .hall-note-field label { color: #7d6744; font-family: ui-monospace, monospace; font-size: 8px; letter-spacing: 1.6px; }
 .hall-note-count { color: #8c7857; font-family: ui-monospace, monospace; font-size: 8px; letter-spacing: .4px; white-space: nowrap; }
-.hall-note-count.is-short { color: #a3452f; }
 .hall-note.is-invalid { border-color: #a33a2c; animation: hall-note-shake .3s ease; }
 @keyframes hall-note-shake { 10%, 90% { transform: translateX(-1px); } 30%, 70% { transform: translateX(3px); } 50% { transform: translateX(-3px); } }
 .hall-note textarea { width: 100%; height: 42px; padding: 0; border: 0; outline: 0; resize: none; color: #2a2116; background: transparent; font-size: 14px; line-height: 1.5; }
