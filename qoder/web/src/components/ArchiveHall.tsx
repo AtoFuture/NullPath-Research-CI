@@ -204,15 +204,17 @@ export function ArchiveHall({ live, onContinue, onNavigate }: { live: boolean; o
 
   async function submit(event: FormEvent) {
     event.preventDefault();
-    if (query.trim().length < 10) {
+    const text = (inputRef.current?.value ?? query).trim();
+    if (text.length < 10) {
       setError("再写具体一点：至少 10 个字，馆员才翻得动旧档。");
       inputRef.current?.focus();
       return;
     }
+    setQuery(text);
     setPending(true);
     setError("");
     try {
-      const next = demo ? { ...sampleHistorySearch, query: query.trim() } : await api.searchHistory(query);
+      const next = demo ? { ...sampleHistorySearch, query: text } : await api.searchHistory(text);
       setResult(next);
       const hasEvidence = next.results.some((item) => item.evidence.length > 0);
       award(hasEvidence ? 15 : 10, hasEvidence ? "查到可定位出处" : "完成一次查证");
@@ -310,16 +312,19 @@ export function ArchiveHall({ live, onContinue, onNavigate }: { live: boolean; o
     </div>
 
     <div className="hall-desk">
-      <form className="hall-note" onSubmit={submit}>
+      {error && <div className="hall-error" id="hall-error" role="alert">{error}</div>}
+      <form className={`hall-note ${error ? "is-invalid" : ""}`} onSubmit={submit}>
         <div className="hall-note-field">
-          <label htmlFor="hall-query">写在纸条上，推给馆员</label>
-          <textarea ref={inputRef} id="hall-query" rows={2} value={query} onChange={(event) => setQuery(event.target.value)} onKeyDown={onNoteKeyDown} placeholder="例如：我想用自注意力替代循环结构，验证长距离依赖是否真的更好……" />
+          <div className="hall-note-meta">
+            <label htmlFor="hall-query">写在纸条上，推给馆员</label>
+            <span className={`hall-note-count ${query.trim().length < 10 ? "is-short" : ""}`}>{query.trim().length < 10 ? `还差 ${10 - query.trim().length} 字` : "字数够了，可以递"}</span>
+          </div>
+          <textarea ref={inputRef} id="hall-query" rows={2} value={query} aria-invalid={Boolean(error)} aria-describedby={error ? "hall-error" : undefined} onChange={(event) => { setQuery(event.target.value); if (error) setError(""); }} onKeyDown={onNoteKeyDown} placeholder="例如：我想用自注意力替代循环结构，验证长距离依赖是否真的更好……" />
         </div>
         <button className="hall-push" type="submit" disabled={(!demo && !live) || pending}>
           {pending ? <LoaderCircle className="spin" size={17} /> : <ArrowRight size={17} />}{pending ? "查档中" : "推过去"}
         </button>
       </form>
-      {error && <div className="hall-error" role="alert">{error}</div>}
       {!demo && !live && <div className="hall-error">本地服务未连接：现在只能看演示馆藏，启动 Compose 后可查自己的资料。</div>}
       <nav className="hall-actions" aria-label="档案馆快捷操作">
         <button onClick={() => inputRef.current?.focus()}><ScrollText size={14} />查一件想法</button>

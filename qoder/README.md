@@ -121,7 +121,7 @@ uv run python ../evaluation/run_secretary.py
 
 资料库闭环通过真实主 API 验收：导入 `evidence/library-import-fixture.md`（arXiv:1706.03762 的公开摘要与原始链接），第一次返回 `imported=1, skipped=0`，重复导入返回 `imported=0, skipped=1`；`GET /api/sources` 保留 `2017-06-12`、`https://arxiv.org/abs/1706.03762` 和稳定 `source-…` ID。相关想法检索将论文排在首位；在 `2026-03-01` cutoff 的真实预检中，论文作为第 2 个比较出现并带回原始出处。
 
-档案馆首屏通过真实主 API 验收：输入 “Replace recurrence with self-attention to model long-range dependencies” 后，回执展示 Attention 与 BERT 两条真实召回及各自可定位出处，盖章「有出处」，考据币从 20 增至 35；点「继续正式考据」会把想法带入表单，机制字段留空等待补充。桌面 1440×900、1024×768 与手机 390×844 三档均完成“写纸条 → 回执”，390×844 另验证了继续预检与表单带入；控制台无错误，手机无横向溢出。静态构建同样可完成查档，但回执固定标注「演示回执」和固定样例说明。公开站点已于 2026-10-27 更新为该静态版本，匿名桌面与手机端复查通过，线上入口引用与本地 `dist` 相同的资源文件。
+档案馆首屏通过真实主 API 验收：输入 “Replace recurrence with self-attention to model long-range dependencies” 后，回执展示 Attention 与 BERT 两条真实召回及各自可定位出处，盖章「有出处」，考据币从 20 增至 35；点「继续正式考据」会把想法带入表单，机制字段留空等待补充。桌面 1440×900、1024×768 与手机 390×844 三档均完成“写纸条 → 回执”，390×844 另验证了继续预检与表单带入；控制台无错误，手机无横向溢出。静态构建同样可完成查档，但回执固定标注「演示回执」和固定样例说明。公开站点已于 2026-10-27 更新为该静态版本，匿名桌面与手机端复查通过，线上入口引用与本地 `dist` 相同的资源文件。纸条至少写 10 个字才提交；不足时会在纸条上方显示红色提示并实时标注「还差 N 字」，不会静默忽略点击。
 
 第二份验收材料 `evidence/library-import-fixture-bert.md`（arXiv:1810.04805 的公开摘要）同样首次导入 1 段、重复导入跳过 1 段；两篇论文共同进入秘书扫描。秘书闭环使用真实主 API 验收：2 个资料分段生成 1 条 `knowledge_line` 提案，人工接受后上下文 revision 为 5；随后的真实预检 `d7c41dfc-1a2c-4aae-b9f2-01634ed9bd40` 在 `context_refs` 中固定该 revision，并召回 Attention 论文。该预检中 BERT 未进入 top-6 融合比较，这是当前召回上限与 RRF 权重的已知边界，未为演示调高上限。回执见 `evidence/secretary-last-run.json`。
 
