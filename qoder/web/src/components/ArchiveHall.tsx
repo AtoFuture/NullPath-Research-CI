@@ -6,6 +6,7 @@ import { searchPublicArchive } from "../publicEngine";
 import { sampleSecretary } from "../sample";
 import type { HistorySearchResponse, Page, SecretaryReport, SourceRecord } from "../types";
 import { DecisionBadge } from "./DecisionBadge";
+import { HallArchivesSheet, type HallSheetKind } from "./HallArchives";
 
 const COIN_KEY = "nullpath.coins.v1";
 const STARTER_COINS = 20;
@@ -182,6 +183,9 @@ export function ArchiveHall({ live, onContinue, onNavigate }: { live: boolean; o
   const [menuOpen, setMenuOpen] = useState(false);
   const [sources, setSources] = useState<SourceRecord[]>([]);
   const [secretary, setSecretary] = useState<SecretaryReport | null>(null);
+  const [sheet, setSheet] = useState<HallSheetKind | null>(null);
+  const [sheetSeed, setSheetSeed] = useState("");
+  const [sheetKey, setSheetKey] = useState(0);
   const inputRef = useRef<HTMLTextAreaElement>(null);
 
   useEffect(() => {
@@ -208,14 +212,7 @@ export function ArchiveHall({ live, onContinue, onNavigate }: { live: boolean; o
     window.setTimeout(() => setCoinGain(""), 2600);
   }
 
-  async function submit(event: FormEvent) {
-    event.preventDefault();
-    const text = (inputRef.current?.value ?? query).trim();
-    if (!text) {
-      setError("先写一句想查的想法，老余才翻得动旧档。");
-      inputRef.current?.focus();
-      return;
-    }
+  async function runSearch(text: string) {
     setQuery(text);
     setPending(true);
     setError("");
@@ -231,6 +228,50 @@ export function ArchiveHall({ live, onContinue, onNavigate }: { live: boolean; o
     }
   }
 
+  async function submit(event: FormEvent) {
+    event.preventDefault();
+    const text = (inputRef.current?.value ?? query).trim();
+    if (!text) {
+      setError("先写一句想查的想法，老余才翻得动旧档。");
+      inputRef.current?.focus();
+      return;
+    }
+    await runSearch(text);
+  }
+
+  function openSheet(kind: HallSheetKind, seed = "") {
+    setMenuOpen(false);
+    setSheetSeed(seed);
+    setSheetKey((current) => current + 1);
+    setSheet(kind);
+  }
+
+  function go(page: Page) {
+    if (!demo) {
+      onNavigate(page);
+      return;
+    }
+    if (page === "sources") openSheet("library");
+    else if (page === "secretary") openSheet("secretary");
+    else if (page === "report" || page === "evidence" || page === "regression") openSheet("verdicts");
+    else if (page === "project" || page === "context") openSheet("project");
+    else if (page === "new") openSheet("precheck");
+  }
+
+  function returnToDesk() {
+    setSheet(null);
+    window.setTimeout(() => inputRef.current?.focus(), 0);
+  }
+
+  function searchFromSheet(text?: string) {
+    setSheet(null);
+    if (text) {
+      void runSearch(text);
+      return;
+    }
+    window.setTimeout(() => inputRef.current?.focus(), 0);
+  }
+
   function onNoteKeyDown(event: KeyboardEvent<HTMLTextAreaElement>) {
     if (event.key === "Enter" && !event.shiftKey && !event.nativeEvent.isComposing) {
       event.preventDefault();
@@ -238,7 +279,19 @@ export function ArchiveHall({ live, onContinue, onNavigate }: { live: boolean; o
     }
   }
 
-  const menuGroups: { label: string; items: { id: Page; label: string; detail: string; icon: typeof LibraryBig }[] }[] = [
+  const menuGroups: { label: string; items: { id: Page; label: string; detail: string; icon: typeof LibraryBig }[] }[] = demo ? [
+    { label: "开始使用", items: [
+      { id: "sources", label: "我的馆藏", detail: "3 份随构建打包的公开资料", icon: LibraryBig },
+      { id: "new", label: "正式考据", detail: "在浏览器里完成一次确定性预检", icon: ScrollText },
+    ] },
+    { label: "高级功能", items: [
+      { id: "secretary", label: "研究秘书", detail: "知识线提案，只提案不拍板", icon: NotebookPen },
+      { id: "report", label: "取回旧裁决", detail: "NO_GO / CONDITIONAL_GO 与原始出处", icon: BookOpen },
+    ] },
+    { label: "交付", items: [
+      { id: "project", label: "技术档案", detail: "技术分工、复现方式与仓库", icon: BookOpen },
+    ] },
+  ] : [
     { label: "开始使用", items: [
       { id: "sources", label: "我的馆藏", detail: "导入并查看自己的论文与记录", icon: LibraryBig },
       { id: "new", label: "正式考据", detail: "完成确定性预检与最小实验条件", icon: ScrollText },
@@ -287,14 +340,14 @@ export function ArchiveHall({ live, onContinue, onNavigate }: { live: boolean; o
       <header><span>今日归档</span><em>只收证据</em></header>
       <ul>
         {recent.length > 0 ? recent.map((item) => <li key={item.title}>
-          <button onClick={() => onNavigate("sources")}>
+          <button onClick={() => go("sources")}>
             <span className="hall-file-icon"><FileText size={14} /></span>
             <span><strong>{item.title}</strong><small>{item.date || "日期待补"}</small></span>
             <em>已收</em>
           </button>
         </li>) : <li className="hall-panel-empty">馆藏还是空的。先收一份自己的论文或复现记录。</li>}
       </ul>
-      <footer><button onClick={() => onNavigate("sources")}><LibraryBig size={14} />馆藏 {sourceCount} 份 · 去整理<ArrowRight size={13} /></button></footer>
+      <footer><button onClick={() => go("sources")}><LibraryBig size={14} />馆藏 {sourceCount} 份 · {demo ? "查看" : "去整理"}<ArrowRight size={13} /></button></footer>
     </aside>
 
     <aside className="hall-panel hall-panel-right">
@@ -304,7 +357,7 @@ export function ArchiveHall({ live, onContinue, onNavigate }: { live: boolean; o
         <div><strong>{acceptedCount}</strong><span>条知识线</span></div>
         <div><strong>{pendingCount}</strong><span>条提案待核</span></div>
       </div>
-      <button className="hall-ledger-link" onClick={() => onNavigate("secretary")}><NotebookPen size={14} />看看秘书提了什么<ChevronRight size={13} /></button>
+      <button className="hall-ledger-link" onClick={() => go("secretary")}><NotebookPen size={14} />看看秘书提了什么<ChevronRight size={13} /></button>
       {pendingCount > 0 && <p className="hall-pending"><span />有 {pendingCount} 条提案等你拍板，馆员不替你决定。</p>}
       <div className="hall-rank">
         <div><span>馆员等级</span><em>{coins} / {nextRank ? nextRank.min : coins} 考据币</em></div>
@@ -334,21 +387,30 @@ export function ArchiveHall({ live, onContinue, onNavigate }: { live: boolean; o
       {!demo && !live && <div className="hall-error">本地服务未连接：现在只能看演示馆藏，启动 Compose 后可查自己的资料。</div>}
       <nav className="hall-actions" aria-label="档案馆快捷操作">
         <button onClick={() => inputRef.current?.focus()}><ScrollText size={14} />查一件想法</button>
-        <button onClick={() => onNavigate("sources")}><LibraryBig size={14} />我的馆藏</button>
-        <button onClick={() => onNavigate("report")}><FileText size={14} />取回旧裁决</button>
-        <button onClick={() => onNavigate("project")}><BookOpen size={14} />技术档案</button>
+        <button onClick={() => go("sources")}><LibraryBig size={14} />我的馆藏</button>
+        <button onClick={() => go("report")}><FileText size={14} />取回旧裁决</button>
+        <button onClick={() => go("project")}><BookOpen size={14} />技术档案</button>
         <span>Enter 递出 · Shift + Enter 换行</span>
       </nav>
     </div>
 
-    {result && <Receipt result={result} demo={demo} onClose={() => { setResult(null); inputRef.current?.focus(); }} onContinue={() => onContinue(result.query)} />}
+    {result && <Receipt result={result} demo={demo} onClose={() => { setResult(null); inputRef.current?.focus(); }} onContinue={() => {
+      if (!demo) {
+        onContinue(result.query);
+        return;
+      }
+      setResult(null);
+      openSheet("precheck", result.query);
+    }} />}
+
+    {sheet && <HallArchivesSheet key={sheetKey} kind={sheet} seed={sheetSeed} onClose={returnToDesk} onOpen={(kind) => openSheet(kind)} onSearch={() => searchFromSheet()} onSearchWith={searchFromSheet} />}
 
     {menuOpen && <div className="hall-drawer-backdrop" onClick={() => setMenuOpen(false)}>
       <aside className="hall-drawer" onClick={(event) => event.stopPropagation()} aria-label="档案柜导航">
         <header><div><span>ARCHIVE DRAWER</span><strong>档案柜</strong></div><button onClick={() => setMenuOpen(false)} aria-label="关闭档案柜"><X size={18} /></button></header>
         {menuGroups.map((group) => <section key={group.label}>
           <span className="hall-drawer-label">{group.label}</span>
-          {group.items.map((item) => <button key={item.id} onClick={() => { setMenuOpen(false); onNavigate(item.id); }}>
+          {group.items.map((item) => <button key={item.id} onClick={() => { setMenuOpen(false); go(item.id); }}>
             <item.icon size={17} />
             <span><strong>{item.label}</strong><small>{item.detail}</small></span>
             <ChevronRight size={14} />

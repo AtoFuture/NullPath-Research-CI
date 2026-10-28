@@ -63,6 +63,35 @@ interface Scored {
 const records = (corpusData as { records: ArchiveRecord[] }).records;
 const docEmbeddings = embeddingData as Record<string, number[]>;
 
+export interface PublicVerdict {
+  id: string;
+  title: string;
+  task: string;
+  domain: string;
+  mechanism: string;
+  failure_condition: string;
+  available_at: string;
+  decision: Decision;
+  evidence: Evidence[];
+}
+
+export function listPublicVerdicts(): PublicVerdict[] {
+  return records
+    .filter((record) => record.historical_decision)
+    .map((record) => ({
+      id: record.id,
+      title: record.title,
+      task: record.task,
+      domain: record.domain,
+      mechanism: record.mechanism,
+      failure_condition: record.failure_condition,
+      available_at: record.available_at,
+      decision: record.historical_decision as Decision,
+      evidence: record.evidence,
+    }))
+    .sort((left, right) => Date.parse(right.available_at) - Date.parse(left.available_at));
+}
+
 const encoder = new TextEncoder();
 
 function embed(text: string): number[] {

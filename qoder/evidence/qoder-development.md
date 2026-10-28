@@ -57,6 +57,7 @@
 - 只用「词面分 > 0」作为召回门控时，IBML 示例会把仅共享 `control` 的 MOON 和仅共享 `two`/`jointly` 的 Attention、BERT 带进比较；增加常用停用词和「不低于最高词面分 25%」的相对门槛后，报告只保留 IBML broad phase diagram 一条历史比较，裁决仍为 `CONDITIONAL_GO`。
 - 公开预检曾把无证据的 IBML identifiability narrow 排到首位，导致比较缺少可定位证据；现在检索池先过滤 cutoff 内无证据记录，报告带回 IBML broad phase diagram 的 3 条证据。
 - 公开回执的长论文摘要视觉过重；机制文本截断到 260 字并保留两行 clamp。手机端回执表头改为堆叠，避免「PUBLIC ARCHIVE RECEIPT · 浏览器实时检索」与回执编号互相挤压。
+- 用户反馈点击馆内入口会跳回浅色工作台、风格割裂；公开演示模式的全部入口改为在同一档案馆内打开纸页：我的馆藏、研究秘书、旧裁决、技术档案与正式考据分别渲染馆内纸页，回执的「继续」和抽屉菜单也走同一套；真实/自托管模式仍保留原工作台路由。旧裁决直接复用公开档案中的历史裁决与证据，不新增后端请求。
 
 ## 验证证据
 
@@ -90,6 +91,7 @@
 | 公开版浏览器内检索 | `confirmation bias` → MOON original（2 条证据，「有出处」）；`self-attention transformer` → Attention + BERT；`今天天气` → 查无旧档且无继续按钮；`code alignment`、`moon`、`phase diagram`、`注意力` 分别命中对应馆藏；1440×900 与 390×844 控制台 0 错误、无横向溢出 |
 | 公开版浏览器内预检 | 内置 IBML 示例在浏览器内返回 `CONDITIONAL_GO`、9 通过/0 失败、3 条证据、1 条历史比较（IBML broad phase diagram），比较中不再出现 MOON/Attention/BERT 噪声 |
 | 动态公开版发布 | 2026-10-28 发布 action `d247e470-e73f-4dec-b51b-41ce85e54a4d` 到 `https://nullpath-research-ci-5dqanvro27t.qoder.zone`；线上入口引用 `index-C70i6bnz.js` / `index-DAY4czuc.css`，与本地 `dist` 一致，匿名桌面与手机端复测通过 |
+| 公开大厅馆内导航 | 演示模式下「我的馆藏 / 正式考据 / 研究秘书 / 取回旧裁决 / 技术档案」、今日归档与底部入口全部在馆内打开纸页，侧栏保持隐藏；IBML 示例报告 9 通过 / 0 失败 / 3 条证据 / 1 条比较；1440×900 与 390×844 无横向溢出、控制台 0 错误 |
 
 详细机器结果见 `golden-results.json` 与 `ablation-results.json`。三路检索在这组小样本上都通过，不据此声称混合检索优于单路。
 
