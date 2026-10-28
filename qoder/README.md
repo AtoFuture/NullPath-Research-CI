@@ -121,7 +121,7 @@ uv run python ../evaluation/run_secretary.py
 
 资料库闭环通过真实主 API 验收：导入 `evidence/library-import-fixture.md`（arXiv:1706.03762 的公开摘要与原始链接），第一次返回 `imported=1, skipped=0`，重复导入返回 `imported=0, skipped=1`；`GET /api/sources` 保留 `2017-06-12`、`https://arxiv.org/abs/1706.03762` 和稳定 `source-…` ID。相关想法检索将论文排在首位；在 `2026-03-01` cutoff 的真实预检中，论文作为第 2 个比较出现并带回原始出处。
 
-档案馆首屏通过真实主 API 验收：输入 “Replace recurrence with self-attention to model long-range dependencies” 后，回执展示 Attention 与 BERT 两条真实召回及各自可定位出处，盖章「有出处」，考据币从 20 增至 35；点「继续正式考据」会把想法带入表单，机制字段留空等待补充。桌面 1440×900、1024×768 与手机 390×844 三档均完成“写纸条 → 回执”，390×844 另验证了继续预检与表单带入；控制台无错误，手机无横向溢出。公开静态构建现在改用浏览器内引擎：同一份输入会执行真实的哈希嵌入、词面+向量 RRF 检索与确定性预检，不再回放固定样例。2026-10-28 已发布到公开站点，线上引用 `index-C70i6bnz.js` / `index-DAY4czuc.css`；`confirmation bias` 召回 MOON original（2 条证据），`self-attention transformer` 召回 Attention 与 BERT，`今天天气` 返回「查无旧档」且不提供继续按钮；IBML 示例在浏览器内得到 `CONDITIONAL_GO`、9 项通过、0 项失败、3 条证据和 1 条历史比较。桌面 1440×900 与手机 390×844 均无横向溢出、控制台 0 错误。纸条只要非空就能提交，1–4 个字的短查询也会照常查档；空纸条会在上方提示先写一句，不会静默忽略点击，输入框旁只保留“写得越具体，越容易翻到旧档”的软提示。公开大厅的次级入口也收进了馆内：底部「我的馆藏 / 取回旧裁决 / 技术档案」、侧边与研究秘书、今日归档和抽屉菜单都会在当前大厅打开纸页式档案，不再跳回浅色工作台；「正式考据」在馆内打开浏览器预检表单，报告同样以纸页呈现。桌面 1440×900 与手机 390×844 逐项验证五个入口及 IBML 示例报告（9 通过 / 0 失败 / 3 条证据 / 1 条比较），均无横向溢出、控制台 0 错误；这一轮构建尚未重新发布到公开站点。
+档案馆首屏通过真实主 API 验收：输入 “Replace recurrence with self-attention to model long-range dependencies” 后，回执展示 Attention 与 BERT 两条真实召回及各自可定位出处，盖章「有出处」，考据币从 20 增至 35；点「继续正式考据」会把想法带入表单，机制字段留空等待补充。桌面 1440×900、1024×768 与手机 390×844 三档均完成“写纸条 → 回执”，390×844 另验证了继续预检与表单带入；控制台无错误，手机无横向溢出。公开静态构建现在改用浏览器内引擎：同一份输入会执行真实的哈希嵌入、词面+向量 RRF 检索与确定性预检，不再回放固定样例。2026-10-28 发布动态版到公开站点；`confirmation bias` 召回 MOON original（2 条证据），`self-attention transformer` 召回 Attention 与 BERT，`今天天气` 返回「查无旧档」且不提供继续按钮；IBML 示例在浏览器内得到 `CONDITIONAL_GO`、9 项通过、0 项失败、3 条证据和 1 条历史比较。桌面 1440×900 与手机 390×844 均无横向溢出、控制台 0 错误。纸条只要非空就能提交，1–4 个字的短查询也会照常查档；空纸条会在上方提示先写一句，不会静默忽略点击，输入框旁只保留“写得越具体，越容易翻到旧档”的软提示。公开大厅的次级入口也收进了馆内：底部「我的馆藏 / 取回旧裁决 / 技术档案」、侧边与研究秘书、今日归档和抽屉菜单都会在当前大厅打开纸页式档案，不再跳回浅色工作台；「正式考据」在馆内打开浏览器预检表单，报告同样以纸页呈现。同日以 action `cd59dd92-93bb-40d3-be4b-11d1959b630f` 重新发布馆内导航修复，线上入口引用 `index-BRBSUW2S.js` / `index-DZ_-GYrD.css`；匿名桌面与手机复测五个入口和 IBML 报告，均无横向溢出、控制台 0 错误，线上预检返回 `CONDITIONAL_GO`（9 通过 / 0 失败 / 3 条证据 / 1 条比较）。
 
 第二份验收材料 `evidence/library-import-fixture-bert.md`（arXiv:1810.04805 的公开摘要）同样首次导入 1 段、重复导入跳过 1 段；两篇论文共同进入秘书扫描。秘书闭环使用真实主 API 验收：2 个资料分段生成 1 条 `knowledge_line` 提案，人工接受后上下文 revision 为 5；随后的真实预检 `d7c41dfc-1a2c-4aae-b9f2-01634ed9bd40` 在 `context_refs` 中固定该 revision，并召回 Attention 论文。该预检中 BERT 未进入 top-6 融合比较，这是当前召回上限与 RRF 权重的已知边界，未为演示调高上限。回执见 `evidence/secretary-last-run.json`。
 
@@ -136,6 +136,8 @@ uv run python ../evaluation/run_secretary.py
 - `evidence/hall-*.png`：档案馆首屏、真实检索回执、移动端回执、档案柜和静态演示回执的界面留档。
 - `evidence/published-dynamic-hall-desktop.png`、`evidence/published-dynamic-hall-mobile.png`：2026-10-28 公开站点桌面与手机端动态检索回执（Attention + BERT）。
 - `evidence/published-dynamic-report-desktop.png`：公开站点浏览器内预检报告（IBML 示例，CONDITIONAL_GO）。
+- `evidence/published-hall-sheets-desktop.png`、`evidence/published-hall-sheets-mobile.png`：2026-10-28 馆内导航修复后的公开站点历史裁决纸页（桌面与手机）。
+- `evidence/published-hall-sheets-report.png`：同一次发布中，公开站点浏览器内 IBML 预检报告（9 通过 / 0 失败 / 3 条证据 / 1 条比较）。
 - `evidence/published-hall-desktop.png`、`evidence/published-hall-mobile.png`：早先固定样例版公开回执留档。
 - `evaluation/golden_cases.json`：预期裁决、必需证据和禁止的未来证据。
 - `evidence/`：实际运行结果、界面截图与 Qoder 开发记录。

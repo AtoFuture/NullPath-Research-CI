@@ -92,6 +92,7 @@
 | 公开版浏览器内预检 | 内置 IBML 示例在浏览器内返回 `CONDITIONAL_GO`、9 通过/0 失败、3 条证据、1 条历史比较（IBML broad phase diagram），比较中不再出现 MOON/Attention/BERT 噪声 |
 | 动态公开版发布 | 2026-10-28 发布 action `d247e470-e73f-4dec-b51b-41ce85e54a4d` 到 `https://nullpath-research-ci-5dqanvro27t.qoder.zone`；线上入口引用 `index-C70i6bnz.js` / `index-DAY4czuc.css`，与本地 `dist` 一致，匿名桌面与手机端复测通过 |
 | 公开大厅馆内导航 | 演示模式下「我的馆藏 / 正式考据 / 研究秘书 / 取回旧裁决 / 技术档案」、今日归档与底部入口全部在馆内打开纸页，侧栏保持隐藏；IBML 示例报告 9 通过 / 0 失败 / 3 条证据 / 1 条比较；1440×900 与 390×844 无横向溢出、控制台 0 错误 |
+| 馆内导航修复发布 | 2026-10-28 发布 action `cd59dd92-93bb-40d3-be4b-11d1959b630f` 到同一站点；线上入口引用 `index-BRBSUW2S.js` / `index-DZ_-GYrD.css`，匿名桌面与 390px 手机打开旧裁决、技术档案与正式考据均在馆内，IBML 示例返回 `CONDITIONAL_GO`、9 通过 / 0 失败 / 3 条证据 / 1 条比较，控制台 0 错误、无横向溢出 |
 
 详细机器结果见 `golden-results.json` 与 `ablation-results.json`。三路检索在这组小样本上都通过，不据此声称混合检索优于单路。
 
