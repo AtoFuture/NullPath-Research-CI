@@ -108,11 +108,13 @@ function experimentText(label: string, value: string) {
 export function ReportView({
   report,
   isDemo,
+  publicComputed,
   onEvidence,
   onDecision,
 }: {
   report: Report;
   isDemo: boolean;
+  publicComputed: boolean;
   onEvidence: () => void;
   onDecision: () => void;
 }) {
@@ -126,7 +128,7 @@ export function ReportView({
         <div>
           <div className="eyebrow-row">
             <span className="eyebrow">EVALUATION / {report.id.slice(0, 18)}</span>
-            {isDemo && <span className="demo-chip">静态演示卡</span>}
+            {isDemo && <span className="demo-chip">{publicComputed ? "浏览器内预检" : "样例报告"}</span>}
             {report.replay_of && <span className="demo-chip">历史回放</span>}
           </div>
           <h1>{report.attempt.title}</h1>
@@ -136,7 +138,7 @@ export function ReportView({
           <button className="button button-secondary" onClick={onEvidence}>
             查看证据链 <ArrowRight size={16} />
           </button>
-          <button className="button button-dark" onClick={onDecision} disabled={isDemo} title={isDemo ? "静态演示不写入终审；请启动本地服务" : "保存人工终审"}>
+          <button className="button button-dark" onClick={onDecision} disabled={isDemo} title={isDemo ? (publicComputed ? "公开版不写入终审；启动本地服务后可保存" : "样例报告不写入终审；请启动本地服务") : "保存人工终审"}>
             <UserCheck size={16} /> 人工终审
           </button>
         </div>

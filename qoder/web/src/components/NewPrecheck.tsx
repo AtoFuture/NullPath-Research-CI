@@ -2,7 +2,7 @@ import { useEffect, useState, type FormEvent } from "react";
 import { ArrowRight, BookOpen, Info, LoaderCircle, LockKeyhole, Play } from "lucide-react";
 import type { AttemptInput, Report } from "../types";
 import { api, staticDemo } from "../api";
-import { sampleReport } from "../sample";
+import { evaluatePublicAttempt } from "../publicEngine";
 
 const example: AttemptInput = {
   title: "IBML identifiability narrow",
@@ -60,13 +60,13 @@ export function NewPrecheck({ disabled, draft, onComplete }: { disabled: boolean
 
   async function submit(event: FormEvent) {
     event.preventDefault();
-    if (staticDemo) {
-      onComplete(sampleReport);
-      return;
-    }
     setPending(true);
     setError("");
     try {
+      if (staticDemo) {
+        onComplete(await evaluatePublicAttempt(form));
+        return;
+      }
       const attempt = await api.createAttempt(form);
       const report = await api.evaluate(attempt.id, new Date().toISOString());
       onComplete(report);
@@ -84,7 +84,7 @@ export function NewPrecheck({ disabled, draft, onComplete }: { disabled: boolean
         <button type="button" className="button button-secondary" onClick={() => setForm(example)}><BookOpen size={16} />填入完整示例</button>
       </div>
       {disabled && (
-        <div className="notice notice-demo"><LockKeyhole size={19} /><div><strong>{staticDemo ? "当前为 Qoder Sites 静态展示" : "本地研究服务尚未连接"}</strong><p>{staticDemo ? "可以填写表单体验，但按钮始终打开固定 MOON 演示报告，不会根据输入假装计算。" : "当前仅展示已标注的演示报告，不会提交到伪后端。"}请在「项目与复现」中按步骤启动本地 seekdb + PowerContext，再提交真实预检。</p></div></div>
+        <div className="notice notice-demo"><LockKeyhole size={19} /><div><strong>{staticDemo ? "公开版在浏览器内实时计算预检" : "本地研究服务尚未连接"}</strong><p>{staticDemo ? "报告会根据你的输入，对公开馆藏执行真实的混合检索、机制比较与确定性检查；结果不写入 seekdb，也不读取 PowerContext。需要持久化与人工终审时，请在「项目与复现」启动本地服务。" : "当前仅展示已标注的演示报告，不会提交到伪后端。请在「项目与复现」中按步骤启动本地 seekdb + PowerContext，再提交真实预检。"}</p></div></div>
       )}
       <form className="precheck-form" onSubmit={submit}>
         <fieldset disabled={(!staticDemo && disabled) || pending}>
@@ -126,7 +126,7 @@ export function NewPrecheck({ disabled, draft, onComplete }: { disabled: boolean
           <div><Info size={16} /><span>报告会给出建议、历史证据和最小判别实验；技术审计信息默认收起。</span></div>
           <button className="button button-accent" type="submit" disabled={(!staticDemo && disabled) || pending}>
             {pending ? <LoaderCircle className="spin" size={17} /> : <Play size={17} />}
-            {pending ? "正在生成避坑报告" : staticDemo ? "查看 MOON 演示报告" : "生成避坑报告"}<ArrowRight size={16} />
+            {pending ? "正在生成避坑报告" : "生成避坑报告"}<ArrowRight size={16} />
           </button>
         </div>
       </form>

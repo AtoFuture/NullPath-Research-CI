@@ -40,14 +40,14 @@ docker compose -f deploy/compose.yaml up --build
 
 ## 主要使用流程
 
-1. 打开「档案馆大厅」，在纸条上写下研究想法，按 Enter 或点「推过去」。这一步真实调用 `POST /api/history-search` 和 seekdb 混合检索，只读查询，不保存提案、不生成裁决。
+1. 打开「档案馆大厅」，在纸条上写下研究想法，按 Enter 或点「推过去」。本地版真实调用 `POST /api/history-search` 和 seekdb 混合检索，只读查询，不保存提案、不生成裁决；公开版没有在线 API，改由浏览器内引擎对打包的公开馆藏执行同样的混合检索。
 2. 收到「检索回执」：命中旧档会列出机制摘要和可定位证据，盖章为「有出处」「待补出处」或「查无旧档」；展开证据条可看原文与稳定 locator。每完成一次查证会加考据币，找到出处额外加成，结论本身不奖励。
 3. 如需正式建议，在回执点「继续正式考据」，想法会带入完整预检；补充“为什么可能有效”、与历史的差异和最小实验条件。
 4. 点「生成避坑报告」，查看中文建议、检查依据和最小判别实验；展开技术详情可核对检索分数、快照与 Run ID。
 5. 可选：打开「研究资料库」，导入自己的论文笔记、复现记录或技术报告；填写原文日期，单文件还可填写原始链接。重复内容会自动跳过，导入资料会进入同一条召回路径。
 6. 可选：打开「研究秘书」，点击「重新扫描资料」，逐条审阅知识线、疑似重复或孤立资料提案。接受的知识线会写入 PowerContext，并成为后续预检的上下文引用。
 
-如果没有导入资料，仍可使用内置演示卡体验同一条检索与预检链路。公开 Qoder Sites 仅提供固定且明确标注的演示，回执会写明“固定样例、不随输入重新检索”，不能把任意输入伪装成在线查询，也不能在线导入本地文件。
+如果没有导入资料，仍可使用内置演示卡体验同一条检索与预检链路。公开 Qoder Sites 不返回固定样例：它在浏览器内对随构建打包的公开馆藏执行真实的 64 维哈希嵌入、词面+向量 RRF 检索和同一套确定性预检规则，结果随输入变化。公开版仍不连接在线后端，也不读取或上传访问者资料；资料导入、秘书、PowerContext、人工终审与可写回放需要本地 Compose。
 
 ### 档案馆大厅与考据币
 
@@ -121,7 +121,7 @@ uv run python ../evaluation/run_secretary.py
 
 资料库闭环通过真实主 API 验收：导入 `evidence/library-import-fixture.md`（arXiv:1706.03762 的公开摘要与原始链接），第一次返回 `imported=1, skipped=0`，重复导入返回 `imported=0, skipped=1`；`GET /api/sources` 保留 `2017-06-12`、`https://arxiv.org/abs/1706.03762` 和稳定 `source-…` ID。相关想法检索将论文排在首位；在 `2026-03-01` cutoff 的真实预检中，论文作为第 2 个比较出现并带回原始出处。
 
-档案馆首屏通过真实主 API 验收：输入 “Replace recurrence with self-attention to model long-range dependencies” 后，回执展示 Attention 与 BERT 两条真实召回及各自可定位出处，盖章「有出处」，考据币从 20 增至 35；点「继续正式考据」会把想法带入表单，机制字段留空等待补充。桌面 1440×900、1024×768 与手机 390×844 三档均完成“写纸条 → 回执”，390×844 另验证了继续预检与表单带入；控制台无错误，手机无横向溢出。静态构建同样可完成查档，但回执固定标注「演示回执」和固定样例说明。公开站点已于 2026-10-27 更新为该静态版本，匿名桌面与手机端复查通过，线上入口引用与本地 `dist` 相同的资源文件。纸条只要非空就能提交，1–4 个字的短查询也会照常查档；空纸条会在上方提示先写一句，不会静默忽略点击，输入框旁只保留“写得越具体，越容易翻到旧档”的软提示。
+档案馆首屏通过真实主 API 验收：输入 “Replace recurrence with self-attention to model long-range dependencies” 后，回执展示 Attention 与 BERT 两条真实召回及各自可定位出处，盖章「有出处」，考据币从 20 增至 35；点「继续正式考据」会把想法带入表单，机制字段留空等待补充。桌面 1440×900、1024×768 与手机 390×844 三档均完成“写纸条 → 回执”，390×844 另验证了继续预检与表单带入；控制台无错误，手机无横向溢出。公开静态构建现在改用浏览器内引擎：同一份输入会执行真实的哈希嵌入、词面+向量 RRF 检索与确定性预检，不再回放固定样例。2026-10-28 已发布到公开站点，线上引用 `index-C70i6bnz.js` / `index-DAY4czuc.css`；`confirmation bias` 召回 MOON original（2 条证据），`self-attention transformer` 召回 Attention 与 BERT，`今天天气` 返回「查无旧档」且不提供继续按钮；IBML 示例在浏览器内得到 `CONDITIONAL_GO`、9 项通过、0 项失败、3 条证据和 1 条历史比较。桌面 1440×900 与手机 390×844 均无横向溢出、控制台 0 错误。纸条只要非空就能提交，1–4 个字的短查询也会照常查档；空纸条会在上方提示先写一句，不会静默忽略点击，输入框旁只保留“写得越具体，越容易翻到旧档”的软提示。
 
 第二份验收材料 `evidence/library-import-fixture-bert.md`（arXiv:1810.04805 的公开摘要）同样首次导入 1 段、重复导入跳过 1 段；两篇论文共同进入秘书扫描。秘书闭环使用真实主 API 验收：2 个资料分段生成 1 条 `knowledge_line` 提案，人工接受后上下文 revision 为 5；随后的真实预检 `d7c41dfc-1a2c-4aae-b9f2-01634ed9bd40` 在 `context_refs` 中固定该 revision，并召回 Attention 论文。该预检中 BERT 未进入 top-6 融合比较，这是当前召回上限与 RRF 权重的已知边界，未为演示调高上限。回执见 `evidence/secretary-last-run.json`。
 
@@ -134,7 +134,9 @@ uv run python ../evaluation/run_secretary.py
 - `evidence/library-import-fixture.md`、`evidence/library-import-fixture-bert.md`：资料库与秘书验收使用的真实公开论文摘要，不是用户实验结果。
 - `evidence/secretary-last-run.json`：秘书夜间脚本的无摘录回执，包含扫描计数、提案 ID 与 PowerContext artifact 修订。
 - `evidence/hall-*.png`：档案馆首屏、真实检索回执、移动端回执、档案柜和静态演示回执的界面留档。
-- `evidence/published-hall-desktop.png`、`evidence/published-hall-mobile.png`：公开站点实际发布的桌面与手机端演示回执。
+- `evidence/published-dynamic-hall-desktop.png`、`evidence/published-dynamic-hall-mobile.png`：2026-10-28 公开站点桌面与手机端动态检索回执（Attention + BERT）。
+- `evidence/published-dynamic-report-desktop.png`：公开站点浏览器内预检报告（IBML 示例，CONDITIONAL_GO）。
+- `evidence/published-hall-desktop.png`、`evidence/published-hall-mobile.png`：早先固定样例版公开回执留档。
 - `evaluation/golden_cases.json`：预期裁决、必需证据和禁止的未来证据。
 - `evidence/`：实际运行结果、界面截图与 Qoder 开发记录。
 
@@ -142,7 +144,15 @@ uv run python ../evaluation/run_secretary.py
 
 ## 静态网站与本地应用的边界
 
-Qoder Sites 发布的是 `web/dist` 静态版本。`web/.env.production` 启用明确标注的演示模式：首屏档案馆保留完整的写纸条、回执和考据币交互，但回执固定显示「演示回执」，并写明“这是一份固定样例回执，不会根据这张纸条重新检索”；可浏览报告、证据、黄金案例、研究资料库和研究秘书样例，但导入本地文件、秘书扫描与审阅、提交、终审、真实回放需要本地服务，不会伪造在线后端或在线摄取。
+Qoder Sites 发布的是 `web/dist` 静态版本，但公开版不是截图或固定回执。`web/.env.production` 启用公开演示模式（`VITE_DEMO_MODE=true`），前端通过 `web/src/publicEngine.ts` 在浏览器内执行：
+
+- 与服务端一致的 BLAKE2b 64 维哈希嵌入（`web/src/blake2b.ts`），以及中文二元词、停用词和复数归一后的词面评分；
+- 词面与向量两路 RRF 融合（权重 0.6/0.4、k=60、每路 8、融合 6），并只保留与最高词面分相对差距不超过 25% 的记录；
+- 同一套 `research-ci-rules-v1` 确定性检查、机制 Jaccard 比较、候选时间边界和快照哈希。
+
+公开馆藏由 `web/scripts/build-public-archive.py` 从 `examples/archive.json` 与两篇公开论文摘要生成，共 10 条记录，其中 5 条带可定位证据；嵌入向量在构建时生成，随静态资源一起发布。报告和回执中的版本号会标明 `browser-vector-fts-rrf-v1` 等公开版实现。
+
+公开版仍然不连接在线后端：结果不写入 seekdb、不读取 PowerContext、不能执行人工终审，也不导入访问者文件。资料导入、秘书扫描与审阅、持久化提交、终审、实验回流和可写回放需要本地服务，不会伪造在线摄取。
 
 公开站点：https://nullpath-research-ci-5dqanvro27t.qoder.zone
 
@@ -176,4 +186,5 @@ PowerContext 更新失败会返回 `context_warning`；已经提交到 seekdb �
 - seekdb 使用 `oceanbase/seekdb:latest`。
 - Web 基于 Qoder Sites React starter，替换为 NullPath 的九视图工作台、视觉系统、API 客户端和 Nginx 配置。
 - 档案馆角色「老余」由组员手绘提供，用于本项目首屏与回执场景；页面其余背景、灯与柜台为 CSS/SVG 绘制。
+- 公开版浏览器内检索引擎（BLAKE2b、哈希嵌入、中文 bigram、RRF 与确定性规则）为本项目实现，版本标识与服务端保持一致。
 - 项目应用代码、数据库模式、演示卡与黄金验证为本项目实现。外部依赖保留各自许可证。

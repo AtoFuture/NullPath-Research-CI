@@ -2,7 +2,8 @@ import { useEffect, useRef, useState, type FormEvent, type KeyboardEvent } from 
 import { ArrowRight, ArrowUpRight, BookOpen, Check, ChevronRight, FileText, Info, LibraryBig, LoaderCircle, LockKeyhole, NotebookPen, RotateCcw, ScrollText, ShieldCheck, X } from "lucide-react";
 import archivist from "../assets/archivist.png";
 import { api, staticDemo } from "../api";
-import { sampleHistorySearch, sampleSecretary } from "../sample";
+import { searchPublicArchive } from "../publicEngine";
+import { sampleSecretary } from "../sample";
 import type { HistorySearchResponse, Page, SecretaryReport, SourceRecord } from "../types";
 import { DecisionBadge } from "./DecisionBadge";
 
@@ -109,6 +110,11 @@ function SceneBackdrop() {
   </div>;
 }
 
+function clipMechanism(text: string): string {
+  const compact = text.replace(/\s+/g, " ").trim();
+  return compact.length > 260 ? `${compact.slice(0, 260).trimEnd()}…` : compact;
+}
+
 function Receipt({ result, demo, onClose, onContinue }: { result: HistorySearchResponse; demo: boolean; onClose: () => void; onContinue: () => void }) {
   const closeRef = useRef<HTMLButtonElement>(null);
   const evidenceCount = result.results.reduce((total, item) => total + item.evidence.length, 0);
@@ -128,11 +134,11 @@ function Receipt({ result, demo, onClose, onContinue }: { result: HistorySearchR
     <article className="hall-receipt" aria-label="检索回执">
       <button ref={closeRef} className="hall-receipt-close" onClick={onClose} aria-label="收回回执"><X size={17} /></button>
       <header className="hall-receipt-head">
-        <div><span>SEEKDB RECEIPT · {demo ? "演示回执" : "真实查证"}</span><strong>检索回执</strong></div>
+        <div><span>{demo ? "PUBLIC ARCHIVE RECEIPT · 浏览器实时检索" : "SEEKDB RECEIPT · 真实查证"}</span><strong>检索回执</strong></div>
         <em>NO. {serial}</em>
       </header>
       <p className="hall-receipt-query">“{result.query}”</p>
-      {demo && <p className="hall-receipt-demo"><Info size={13} />静态演示：这是一份固定样例回执，不会根据这张纸条重新检索。</p>}
+      {demo && <p className="hall-receipt-demo"><Info size={13} />公开版在你的浏览器里检索公开馆藏；资料导入、人工终审与本地记忆需启动 seekdb。</p>}
       <div className="hall-receipt-summary">
         <div><strong>{result.results.length ? `翻到 ${result.results.length} 份旧档` : "档案里没有对得上的记录"}</strong><span>{result.results.length ? `其中 ${evidenceCount} 条可定位证据；没找到也不等于创新成立。` : "可以补一句机制描述，或把资料先收进馆藏再查。"}</span></div>
         <div className="hall-stamp">{stamp}</div>
@@ -144,7 +150,7 @@ function Receipt({ result, demo, onClose, onContinue }: { result: HistorySearchR
             <div>
               <div className="hall-receipt-title"><h3>{item.title}</h3>{item.historical_decision && <DecisionBadge decision={item.historical_decision} />}</div>
               <div className="hall-receipt-meta">{item.task} · {item.evidence.length} 条可定位证据{item.available_at ? ` · ${item.available_at.slice(0, 10)}` : ""}</div>
-              <p className="hall-receipt-mechanism">{item.mechanism}</p>
+              <p className="hall-receipt-mechanism">{clipMechanism(item.mechanism)}</p>
               {item.evidence.map((evidence) => <details className="hall-receipt-evidence" key={evidence.id}>
                 <summary><FileText size={13} />{evidence.title}<span className={`stance stance-${evidence.stance}`}>{stanceLabels[evidence.stance]}</span><ChevronRight size={13} /></summary>
                 <blockquote>{evidence.excerpt}</blockquote>
@@ -214,7 +220,7 @@ export function ArchiveHall({ live, onContinue, onNavigate }: { live: boolean; o
     setPending(true);
     setError("");
     try {
-      const next = demo ? { ...sampleHistorySearch, query: text } : await api.searchHistory(text);
+      const next = demo ? await searchPublicArchive(text) : await api.searchHistory(text);
       setResult(next);
       const hasEvidence = next.results.some((item) => item.evidence.length > 0);
       award(hasEvidence ? 15 : 10, hasEvidence ? "查到可定位出处" : "完成一次查证");
@@ -260,7 +266,7 @@ export function ArchiveHall({ live, onContinue, onNavigate }: { live: boolean; o
         <div><strong>NullPath</strong><small>研究档案馆</small></div>
       </div>
       <div className="hall-top-right">
-        <span className={`hall-status ${live ? "is-live" : "is-demo"}`}><i />{live ? "灯亮着 · 服务在线" : demo ? "演示馆藏" : "本地服务未连接"}</span>
+        <span className={`hall-status ${live ? "is-live" : "is-demo"}`}><i />{live ? "灯亮着 · 服务在线" : demo ? "公开馆藏 · 实时检索" : "本地服务未连接"}</span>
         <div className="hall-coins" title="只奖励查证动作，不奖励结论">
           <span className="hall-coin">考</span>
           <strong>{coins}</strong>
@@ -292,7 +298,7 @@ export function ArchiveHall({ live, onContinue, onNavigate }: { live: boolean; o
     </aside>
 
     <aside className="hall-panel hall-panel-right">
-      <header><span>值班台</span><em>{live ? "LIVE" : "DEMO"}</em></header>
+      <header><span>值班台</span><em>{live ? "LIVE" : "PUBLIC"}</em></header>
       <div className="hall-ledger">
         <div><strong>{sourceCount}</strong><span>份资料入馆</span></div>
         <div><strong>{acceptedCount}</strong><span>条知识线</span></div>
@@ -349,7 +355,7 @@ export function ArchiveHall({ live, onContinue, onNavigate }: { live: boolean; o
           </button>)}
         </section>)}
         <footer>
-          <span className={`hall-status ${live ? "is-live" : "is-demo"}`}><i />{live ? "seekdb · PowerContext 在线" : demo ? "静态演示数据" : "本地服务未连接"}</span>
+          <span className={`hall-status ${live ? "is-live" : "is-demo"}`}><i />{live ? "seekdb · PowerContext 在线" : demo ? "公开馆藏 · 浏览器实时检索" : "本地服务未连接"}</span>
           <a href="https://github.com/AtoFuture/NullPath-Research-CI" target="_blank" rel="noreferrer">代码仓库<ArrowUpRight size={13} /></a>
         </footer>
       </aside>

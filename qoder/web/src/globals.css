@@ -788,6 +788,8 @@ label small { color: var(--muted); font-size: 9px; font-weight: 400; }
   .hall-actions > span { display: none; }
   .hall-receipt-wrap { inset: 62px 0 186px; padding: 0 8px; }
   .hall-receipt { width: 100%; padding: 16px 14px 12px; }
+  .hall-receipt-head { flex-direction: column; gap: 3px; }
+  .hall-receipt-head span { letter-spacing: 1.2px; }
   .hall-receipt-head strong { font-size: 19px; letter-spacing: 3px; }
   .hall-receipt-summary { align-items: flex-start; }
   .hall-stamp { font-size: 12px; padding: 4px 7px; }

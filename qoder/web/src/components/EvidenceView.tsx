@@ -7,7 +7,7 @@ export function EvidenceView({ report, isDemo }: { report: Report; isDemo: boole
     <div className="page evidence-page">
       <div className="page-heading">
         <div><span className="eyebrow">TRACE / EVIDENCE LINEAGE</span><h1>从裁决逐层回到原始出处</h1><p>每条关键比较都保留检索分数、机制差异、证据 ID、原文定位与可用时间。</p></div>
-        {isDemo && <span className="demo-chip">演示证据，不是原始实验日志</span>}
+        {isDemo && <span className="demo-chip">公开馆藏证据，不是原始实验日志</span>}
       </div>
       <section className="lineage-root">
         <span className="lineage-step">DECISION</span>

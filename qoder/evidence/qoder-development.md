@@ -21,6 +21,7 @@
 9. 根据“内置证据无法代表用户真实资料”的反馈，新增本地研究资料库：浏览器读取 Markdown/TXT，API 按段落切分并写入 seekdb；每段保留原文、资料日期、稳定 locator 与幂等 ID，导入记录直接进入既有混合检索和完整预检。
 10. 根据“加一个秘书管理资料、让 PowerContext 有真实用途”的反馈，实现确定性研究秘书：扫描已导入资料，按词面 Jaccard 与向量余弦生成知识线、疑似重复和孤立资料提案；审阅状态持久化，只有人工接受的知识线写入 PowerContext 的 `secretary_context`，不修改 seekdb 证据、预检结论或人工裁决。另提供无模型调用的夜间扫描脚本与无摘录回执。
 11. 根据“就要游戏化，这样才有人愿意用”和组员手绘角色的反馈，把默认入口改为「研究档案馆」：纸条输入、夜班馆员老余、检索回执、考据币与四级馆员等级。检索仍走同一只读 API，回执只标出处、不替用户决定；静态演示保留交互，但回执固定标注「演示回执」。
+12. 根据“切换动态，不要静态演示”的反馈，把公开站点从固定样例改为浏览器内真实引擎：`web/src/blake2b.ts` 复刻服务端 BLAKE2b-128 哈希嵌入，`web/scripts/build-public-archive.py` 从 8 张重建卡和 2 篇公开论文摘要生成 10 条公开馆藏及 64 维向量，`web/src/publicEngine.ts` 执行中文二元词 + 停用词归一、词面/向量 RRF（0.6/0.4、k=60）、证据过滤、机制 Jaccard 比较、确定性门槛、时间边界与快照哈希。大厅与完整预检都改为按用户输入实时计算，报告版本标记为 `browser-*`。公开版仍明确声明不写入 seekdb、不读取 PowerContext、不执行人工终审。
 
 ## 实际修复记录
 
@@ -52,6 +53,10 @@
 - 移动端顶栏的第三个导航项曾被裁掉；压缩导航内边距与字号后，「档案馆大厅 / 研究资料库 / 完整预检」在 390px 内完整显示，其余项横向滚动。
 - 从回执点「继续正式考据」时，标题和机制曾被整段复制；改为标题取前 6 个词、机制留空，让用户自己补“为什么可能有效”。
 - 用户反馈「推过去」点击没反应：曾要求至少 10 个字才提交，但短想法同样可以检索，限制只会制造摩擦；现已去掉字数门槛，只拦空输入，提交时读取 textarea 的实际值以避开中文输入法回填延迟，并在纸条上方显示明确提示。
+- 公开版词面检索最初按单个汉字切词，BERT 别名中的「码」会误命中「代码迁移」；改为中文 bigram，同时保留单字查询。BLAKE2b 实现已用空串、ASCII、中文、长文本和多词查询与 Python 输出逐字节比对。
+- 只用「词面分 > 0」作为召回门控时，IBML 示例会把仅共享 `control` 的 MOON 和仅共享 `two`/`jointly` 的 Attention、BERT 带进比较；增加常用停用词和「不低于最高词面分 25%」的相对门槛后，报告只保留 IBML broad phase diagram 一条历史比较，裁决仍为 `CONDITIONAL_GO`。
+- 公开预检曾把无证据的 IBML identifiability narrow 排到首位，导致比较缺少可定位证据；现在检索池先过滤 cutoff 内无证据记录，报告带回 IBML broad phase diagram 的 3 条证据。
+- 公开回执的长论文摘要视觉过重；机制文本截断到 260 字并保留两行 clamp。手机端回执表头改为堆叠，避免「PUBLIC ARCHIVE RECEIPT · 浏览器实时检索」与回执编号互相挤压。
 
 ## 验证证据
 
@@ -82,6 +87,9 @@
 | Qoder Sites 公开更新 | 2026-10-27 发布 action `ace3d78d-46d0-40b9-bcb2-d21c9fd094c4` 到 `https://nullpath-research-ci-5dqanvro27t.qoder.zone`；匿名首屏、资料库与秘书固定演示通过，控制台无错误 |
 | Qoder Sites 档案馆发布 | 2026-10-27 发布 action `3bfc2135-cbf4-4f30-91fc-1a7ec430d0b4` 到同一站点；线上入口引用与本地 `dist` 相同的 `index-DMegC5pi.js` / `index-k1bi_Idi.css`，匿名桌面 1440×727 与手机 390×844 均完成写纸条→回执，回执标注「演示回执」，考据币 20→35（同一浏览器移动端再查一次累加至 50），控制台 0 错误、无横向溢出 |
 | Qoder Sites 提交门槛发布 | 2026-10-27 发布 action `6aa5a2e2-9d4d-4088-b5c1-4bd6b1a4be06` 到同一站点；线上入口引用 `index-CArjwl1m.js` / `index-6pI8IuTa.css`，空输入显示完整红色提示，4 字与 1 字输入均可提交并返回回执，桌面鼠标与手机触摸通过，控制台 0 错误、无横向溢出 |
+| 公开版浏览器内检索 | `confirmation bias` → MOON original（2 条证据，「有出处」）；`self-attention transformer` → Attention + BERT；`今天天气` → 查无旧档且无继续按钮；`code alignment`、`moon`、`phase diagram`、`注意力` 分别命中对应馆藏；1440×900 与 390×844 控制台 0 错误、无横向溢出 |
+| 公开版浏览器内预检 | 内置 IBML 示例在浏览器内返回 `CONDITIONAL_GO`、9 通过/0 失败、3 条证据、1 条历史比较（IBML broad phase diagram），比较中不再出现 MOON/Attention/BERT 噪声 |
+| 动态公开版发布 | 2026-10-28 发布 action `d247e470-e73f-4dec-b51b-41ce85e54a4d` 到 `https://nullpath-research-ci-5dqanvro27t.qoder.zone`；线上入口引用 `index-C70i6bnz.js` / `index-DAY4czuc.css`，与本地 `dist` 一致，匿名桌面与手机端复测通过 |
 
 详细机器结果见 `golden-results.json` 与 `ablation-results.json`。三路检索在这组小样本上都通过，不据此声称混合检索优于单路。
 
@@ -101,9 +109,12 @@
 - `hall-receipt.png`：真实检索回执，2 条召回、2 条可定位证据和「有出处」印章。
 - `hall-mobile.png`、`hall-mobile-receipt.png`：390×844 手机首屏与两结果回执。
 - `hall-drawer.png`：手机档案柜导航抽屉。
-- `hall-demo-receipt.png`：静态站固定演示回执，显式标注「演示回执」和固定样例说明。
-- `published-hall-desktop.png`：公开站点桌面端演示回执（1440×727），印章、证据与考据币均来自页面自身，不请求后端。
-- `published-hall-mobile.png`：公开站点 390×844 手机端回执，两条证据与底部操作完整可见。
+- `hall-demo-receipt.png`：早先静态站固定演示回执留档，曾显式标注「演示回执」和固定样例说明。
+- `published-dynamic-hall-desktop.png`：2026-10-28 公开站点动态检索回执（1440×900），`self-attention transformer` 实时召回 Attention 与 BERT。
+- `published-dynamic-hall-mobile.png`：公开站点 390×844 动态回执，`attention transformer` 返回两条带出处记录，表头堆叠不溢出。
+- `published-dynamic-report-desktop.png`：公开站点浏览器内预检报告，IBML 示例得到 `CONDITIONAL_GO`、9 通过/0 失败、3 条证据、1 条历史比较。
+- `published-hall-desktop.png`：早先公开站点桌面端固定演示回执（1440×727），保留作版本对比。
+- `published-hall-mobile.png`：早先公开站点 390×844 手机端固定演示回执。
 - `hall-empty-error.png`、`hall-mobile-empty-error.png`：空提交时的红色提示和「写得越具体，越容易翻到旧档」软提示。
 - `hall-mobile-short-query.png`：4 字短查询也能提交并得到固定演示回执。
 - `library-import.png`、`library-search.png`：真实导入资料及检索出处。
@@ -137,9 +148,10 @@ uv run python ../evaluation/run_secretary.py
 - 完整预检默认取混合检索 top-6 比较；两篇导入论文中 Attention 能进入比较，BERT 在本次 cutoff 下未进入，这是当前 RRF 权重与召回上限的真实边界，未为演示调参。
 - 默认模型为确定性本地实现；可选 LLM 只负责语义比较，硬门槛与最终机器建议由应用规则生成。
 - 时间隔离只保证输入证据的 cutoff，不声称模型训练知识具有时间边界。
-- Qoder Sites 仅发布明确标注的静态演示数据，资料库页面中的论文与研究秘书样例都是固定数据；首屏回执同样固定标注「演示回执 / 不随输入重新检索」。真实导入、秘书扫描与审阅、提交、终审、实验回流和回放需要本地 Compose 服务。
+- Qoder Sites 公开版现在在浏览器内执行真实检索与确定性预检，但只针对随构建打包的 10 条公开馆藏（8 张重建演示卡 + 2 篇公开论文摘要，其中 5 条带可定位证据）；不会读取或上传访问者资料，结果不写入 seekdb、不读取 PowerContext、不能执行人工终审。资料导入、秘书扫描与审阅、持久化提交、终审、实验回流和可写回放仍需本地 Compose 服务。
+- 公开馆藏是重建演示卡与公开论文摘要，不是访问者自己的实验日志；浏览器内引擎使用与服务端相同的算法版本标识，但公开版的检索分数与裁决只用于演示同一条规则链路，不替代本地真实数据的预检结论。
 - 档案馆的考据币只保存在浏览器 `localStorage`，不上传，也不影响研究记录或裁决；等级只反映查证次数，不代表研究质量或结论可信度。角色与场景采用组员手绘插画和本地 CSS/SVG，不加载远程素材。
-- 公开站点已于 2026-10-27 更新为档案馆大厅版本并补上提交反馈；匿名桌面与 390px 移动端验收通过，固定回执、印章与考据币可用。静态版仍不连接在线后端，真实验证需按本地 Compose 步骤运行。
+- 公开站点已于 2026-10-28 更新为浏览器内动态版本；匿名桌面 1440×900 与手机 390×844 均完成写纸条→实时回执和完整预检，结果随输入变化，控制台 0 错误、无横向溢出。公开版仍不连接在线后端，真实资料与持久化验证需按本地 Compose 步骤运行。
 - 档案馆只拦空输入；1 个字或 4 个字的短查询同样可以提交，界面提示“写得越具体，越容易翻到旧档”，不会静默忽略点击。
 - 本地 PowerContext 配置关闭访问控制，仅绑定回环地址，不能直接暴露公网。
 - 代码推送与仓库公开由账号持有人执行；Qoder 仅完成本地提交与远端内容复核，未更改仓库可见性。
